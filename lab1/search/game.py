@@ -76,7 +76,7 @@ class Configuration:
     horizontally and y increases vertically.  Therefore, north is the direction of increasing y, or (0,1).
     """
 
-    def __init__(self, pos, direction):
+    def __init__(self, pos : tuple[int, int], direction : str):
         self.pos = pos
         self.direction = direction
 
@@ -122,7 +122,7 @@ class AgentState:
     AgentStates hold the state of an agent (configuration, speed, scared, etc).
     """
 
-    def __init__( self, startConfiguration, isPacman ):
+    def __init__( self, startConfiguration : Configuration, isPacman ):
         self.start = startConfiguration
         self.configuration = startConfiguration
         self.isPacman = isPacman
@@ -491,7 +491,7 @@ class GameStateData:
             return '3'
         return 'E'
 
-    def initialize( self, layout, numGhostAgents ):
+    def initialize( self, layout , numGhostAgents ):
         """
         Creates an initial game state from a layout array (see layout.py).
         """
@@ -507,9 +507,9 @@ class GameStateData:
         for isPacman, pos in layout.agentPositions:
             if not isPacman:
                 if numGhosts == numGhostAgents: continue # Max ghosts reached already
-                else: numGhosts += 1
+                else: numGhosts += 1 # added
             self.agentStates.append( AgentState( Configuration( pos, Directions.STOP), isPacman) )
-        self._eaten = [False for a in self.agentStates]
+        self._eaten = [False for a in self.agentStates] # initalized with False
 
 try:
     import boinc
@@ -522,7 +522,7 @@ class Game:
     The Game manages the control flow, soliciting actions from agents.
     """
 
-    def __init__( self, agents, display, rules, startingIndex=0, muteAgents=False, catchExceptions=False ):
+    def __init__( self, agents : list[Agent], display, rules, startingIndex=0, muteAgents=False, catchExceptions=False ):
         self.agentCrashed = False
         self.agents = agents
         self.display = display
@@ -544,6 +544,8 @@ class Game:
         else:
             return self.rules.getProgress(self)
 
+    # 1. failed to load
+    # 2. exception
     def _agentCrash( self, agentIndex, quiet=False):
         "Helper method for handling agent crashes"
         if not quiet: traceback.print_exc()
@@ -590,9 +592,9 @@ class Game:
                 self.unmute()
                 self._agentCrash(i, quiet=True)
                 return
-            if ("registerInitialState" in dir(agent)):
+            if ("registerInitialState" in dir(agent)): # in searchAgents.py
                 self.mute(i)
-                if self.catchExceptions:
+                if self.catchExceptions: # run if catchExceptions is On
                     try:
                         timed_func = TimeoutFunction(agent.registerInitialState, int(self.rules.getMaxStartupTime(i)))
                         try:
