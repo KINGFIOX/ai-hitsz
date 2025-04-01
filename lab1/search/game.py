@@ -306,6 +306,7 @@ class Actions:
 
     TOLERANCE = .001
 
+    @staticmethod
     def reverseDirection(action):
         if action == Directions.NORTH:
             return Directions.SOUTH
@@ -316,8 +317,9 @@ class Actions:
         if action == Directions.WEST:
             return Directions.EAST
         return action
-    reverseDirection = staticmethod(reverseDirection)
+    # reverseDirection = staticmethod(reverseDirection)
 
+    @staticmethod
     def vectorToDirection(vector):
         dx, dy = vector
         if dy > 0:
@@ -329,13 +331,15 @@ class Actions:
         if dx > 0:
             return Directions.EAST
         return Directions.STOP
-    vectorToDirection = staticmethod(vectorToDirection)
+    # vectorToDirection = staticmethod(vectorToDirection)
 
+    @staticmethod
     def directionToVector(direction, speed = 1.0):
         dx, dy =  Actions._directions[direction]
         return (dx * speed, dy * speed)
-    directionToVector = staticmethod(directionToVector)
+    # directionToVector = staticmethod(directionToVector)
 
+    @staticmethod
     def getPossibleActions(config, walls):
         possible = []
         x, y = config.pos
@@ -352,9 +356,9 @@ class Actions:
             if not walls[next_x][next_y]: possible.append(dir)
 
         return possible
+    # getPossibleActions = staticmethod(getPossibleActions)
 
-    getPossibleActions = staticmethod(getPossibleActions)
-
+    @staticmethod
     def getLegalNeighbors(position, walls):
         x,y = position
         x_int, y_int = int(x + 0.5), int(y + 0.5)
@@ -367,13 +371,14 @@ class Actions:
             if next_y < 0 or next_y == walls.height: continue
             if not walls[next_x][next_y]: neighbors.append((next_x, next_y))
         return neighbors
-    getLegalNeighbors = staticmethod(getLegalNeighbors)
+    # getLegalNeighbors = staticmethod(getLegalNeighbors)
 
+    @staticmethod
     def getSuccessor(position, action):
         dx, dy = Actions.directionToVector(action)
         x, y = position
         return (x + dx, y + dy)
-    getSuccessor = staticmethod(getSuccessor)
+    # getSuccessor = staticmethod(getSuccessor)
 
 class GameStateData:
     """

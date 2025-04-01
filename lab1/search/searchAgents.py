@@ -327,6 +327,7 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+            # https://zhuanlan.zhihu.com/p/620720903, 不懂.
             x, y = state[0] # state :: ((Int, Int), (Bool, Bool, Bool, Bool)), the second tuple is the food eaten
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
