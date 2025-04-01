@@ -82,12 +82,12 @@ class SearchAgent(Agent):
         if fn not in dir(search):
             raise AttributeError(fn + ' is not a search function in search.py.')
         func = getattr(search, fn)
-        if 'heuristic' not in func.__code__.co_varnames:
+        if 'heuristic' not in func.__code__.co_varnames: # func.__code__.co_varnames: list of parameter names
             print('[SearchAgent] using function ' + fn)
             self.searchFunction = func
         else:
-            if heuristic in globals().keys():
-                heur = globals()[heuristic]
+            if heuristic in globals().keys(): # find the heuristic function in the global scope, which is built-in, not in search.py
+                heur = globals()[heuristic] # get the function pointer
             elif heuristic in dir(search):
                 heur = getattr(search, heuristic)
             else:
@@ -96,7 +96,7 @@ class SearchAgent(Agent):
             # Note: this bit of Python trickery combines the search algorithm and the heuristic
             self.searchFunction = lambda x: func(x, heuristic=heur)
 
-        # Get the search problem type from the name
+        # Get the search problem type from the name. (the target of the search problem)
         if prob not in globals().keys() or not prob.endswith('Problem'):
             raise AttributeError(prob + ' is not a search problem type in SearchAgents.py.')
         self.searchType = globals()[prob]
@@ -114,7 +114,7 @@ class SearchAgent(Agent):
         if self.searchFunction == None: raise Exception("No search function provided for SearchAgent")
         starttime = time.time()
         problem = self.searchType(state) # Makes a new search problem
-        self.actions  = self.searchFunction(problem) # Find a path
+        self.actions = self.searchFunction(problem) # Find a path
         if self.actions == None:
             self.actions = []
         totalCost = problem.getCostOfActions(self.actions)
@@ -198,7 +198,7 @@ class PositionSearchProblem(search.SearchProblem):
 
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
-            x,y = state
+            x, y = state
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
             if not self.walls[nextx][nexty]:

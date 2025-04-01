@@ -445,6 +445,18 @@ class Counter(dict):
             addend[key] = -1 * y[key]
         return addend
 
+def eprint_stack():
+    import inspect
+    stack = inspect.stack()[1:]
+    print("\nCall Stack:")
+    print("-" * 50)
+    for frame in stack:
+        print(f"File: {frame.filename}")
+        print(f"Line: {frame.lineno}")
+        print(f"Function: {frame.function}")
+        print(f"Code: {frame.code_context[0].strip() if frame.code_context else 'No code context'}")
+        print("-" * 50)
+
 def raiseNotDefined():
     fileName = inspect.stack()[1][1]
     line = inspect.stack()[1][2]
