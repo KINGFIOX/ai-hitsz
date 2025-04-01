@@ -28,10 +28,10 @@ class Layout:
     def __init__(self, layoutText):
         self.width = len(layoutText[0])
         self.height= len(layoutText)
-        self.walls = Grid(self.width, self.height, False)
-        self.food = Grid(self.width, self.height, False)
-        self.capsules = []
-        self.agentPositions = []
+        self.walls = Grid(self.width, self.height, False) # init with all False
+        self.food = Grid(self.width, self.height, False) # init with all False
+        self.capsules = [] # capsule is a prop, which if eaten, ghost will be scared
+        self.agentPositions = [] # agent(pacman or ghost) initial position
         self.numGhosts = 0
         self.processLayoutText(layoutText)
         self.layoutText = layoutText
@@ -88,7 +88,7 @@ class Layout:
         return ghostPos in self.visibility[row][col][pacDirection]
 
     def __str__(self):
-        return "\n".join(self.layoutText)
+        return "\n".join(self.layoutText) # :: [String] -> String
 
     def deepCopy(self):
         return Layout(self.layoutText[:])
@@ -112,6 +112,7 @@ class Layout:
                 layoutChar = layoutText[maxY - y][x]
                 self.processLayoutChar(x, y, layoutChar)
         self.agentPositions.sort()
+        # [(Int, (Int, Int))] -> [(Bool, (Int, Int))]
         self.agentPositions = [ ( i == 0, pos) for i, pos in self.agentPositions]
 
     def processLayoutChar(self, x, y, layoutChar):
@@ -121,12 +122,12 @@ class Layout:
             self.food[x][y] = True
         elif layoutChar == 'o':
             self.capsules.append((x, y))
-        elif layoutChar == 'P':
+        elif layoutChar == 'P': # pacman 
             self.agentPositions.append( (0, (x, y) ) )
-        elif layoutChar in ['G']:
+        elif layoutChar in ['G']: # ghost
             self.agentPositions.append( (1, (x, y) ) )
             self.numGhosts += 1
-        elif layoutChar in  ['1', '2', '3', '4']:
+        elif layoutChar in  ['1', '2', '3', '4']: # if there are multi ghosts, they would be represented by 1, 2, 3, 4 instead of G
             self.agentPositions.append( (int(layoutChar), (x,y)))
             self.numGhosts += 1
 def getLayout(name, back = 2):
@@ -138,9 +139,9 @@ def getLayout(name, back = 2):
         if layout == None: layout = tryToLoad(name + '.lay')
     if layout == None and back >= 0:
         curdir = os.path.abspath('.')
-        os.chdir('..')
+        os.chdir('..') # search in parent directory
         layout = getLayout(name, back -1)
-        os.chdir(curdir)
+        os.chdir(curdir) # restore current directory
     return layout
 
 def tryToLoad(fullname):
