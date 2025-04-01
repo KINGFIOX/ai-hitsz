@@ -289,6 +289,7 @@ class CornersProblem(search.SearchProblem):
             if not startingGameState.hasFood(*corner):
                 print('Warning: no food in corner ' + str(corner))
         self._expanded = 0 # DO NOT CHANGE; Number of search nodes expanded
+        self.startingFood = tuple([0] * len(self.corners))
 
     def getStartState(self):
         """
@@ -296,14 +297,14 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return (self.startingPosition, self.startingFood)
 
     def isGoalState(self, state: Any):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return sum(state[1]) == len(self.corners)
 
     def getSuccessors(self, state: Any):
         """
@@ -326,6 +327,18 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+            x, y = state[0] # state :: ((Int, Int), (Bool, Bool, Bool, Bool)), the second tuple is the food eaten
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
+            if not hitsWall:
+                location = (nextx, nexty)
+                foodEaten = list(state[1])
+                if location in self.corners:
+                    index = self.corners.index(location)
+                    foodEaten[index] = 1
+                successor = ((location, tuple(foodEaten)), action, 1)
+                successors.append(successor)
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
