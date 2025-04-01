@@ -43,6 +43,9 @@ from game import GameStateData
 from game import Game
 from game import Directions
 from game import Actions
+from game import Agent
+from ghostAgents import GhostAgent
+from layout import Layout
 from util import nearestPoint
 from util import manhattanDistance
 import util, layout
@@ -247,7 +250,7 @@ class GameState:
 
         return str(self.data)
 
-    def initialize( self, layout, numGhostAgents=1000 ):
+    def initialize( self, layout : Layout, numGhostAgents=1000 ):
         """
         Creates an initial game state from a layout array (see layout.py).
         """
@@ -271,7 +274,7 @@ class ClassicGameRules:
     def __init__(self, timeout=30):
         self.timeout = timeout
 
-    def newGame( self, layout, pacmanAgent, ghostAgents, display, quiet = False, catchExceptions=False):
+    def newGame( self, layout : Layout, pacmanAgent : Agent, ghostAgents : list[GhostAgent], display, quiet = False, catchExceptions=False):
         agents = [pacmanAgent] + ghostAgents[:layout.getNumGhosts()]
         initState = GameState()
         initState.initialize( layout, len(ghostAgents) )
@@ -537,9 +540,10 @@ def readCommand( argv ):
     if args['layout'] == None: raise Exception("The layout " + options.layout + " cannot be found")
 
     # Choose a Pacman agent
+    # noKeyboard :: Bool
     noKeyboard = options.gameToReplay == None and (options.textGraphics or options.quietGraphics)
     pacmanType = loadAgent(options.pacman, noKeyboard)
-    agentOpts = parseAgentArgs(options.agentArgs)
+    agentOpts = parseAgentArgs(options.agentArgs) # return a dict
     if options.numTraining > 0:
         args['numTraining'] = options.numTraining
         if 'numTraining' not in agentOpts: agentOpts['numTraining'] = options.numTraining
@@ -553,7 +557,7 @@ def readCommand( argv ):
 
     # Choose a ghost agent
     ghostType = loadAgent(options.ghost, noKeyboard)
-    args['ghosts'] = [ghostType( i+1 ) for i in range( options.numGhosts )]
+    args['ghosts'] = [ghostType( i+1 ) for i in range( options.numGhosts )] # all ghosts are initialized with the same arithmetic
 
     # Choose a display format
     if options.quietGraphics:
@@ -571,7 +575,7 @@ def readCommand( argv ):
     args['catchExceptions'] = options.catchExceptions
     args['timeout'] = options.timeout
 
-    # Special case: recorded games don't use the runGames method or args structure
+    # Special case: recorded games don't use the runGames method or args structure.
     if options.gameToReplay != None:
         print('Replaying recorded game %s.' % options.gameToReplay)
         import pickle
@@ -587,7 +591,7 @@ def readCommand( argv ):
 def loadAgent(pacman, nographics):
     # Looks through all pythonPath Directories for the right module,
     pythonPathStr = os.path.expandvars("$PYTHONPATH")
-    if pythonPathStr.find(';') == -1:
+    if pythonPathStr.find(';') == -1: # split by ':' or ';'
         pythonPathDirs = pythonPathStr.split(':')
     else:
         pythonPathDirs = pythonPathStr.split(';')
@@ -595,16 +599,17 @@ def loadAgent(pacman, nographics):
 
     for moduleDir in pythonPathDirs:
         if not os.path.isdir(moduleDir): continue
+        # ghostAgents.py, keyboardAgents.py, pacmanAgents.py searchAgents.py ...
         moduleNames = [f for f in os.listdir(moduleDir) if f.endswith('gents.py')]
         for modulename in moduleNames:
             try:
-                module = __import__(modulename[:-3])
+                module = __import__(modulename[:-3]) # remove `.py`
             except ImportError:
                 continue
-            if pacman in dir(module):
+            if pacman in dir(module): # check if pacman is in the module
                 if nographics and modulename == 'keyboardAgents.py':
                     raise Exception('Using the keyboard requires graphics (not text display)')
-                return getattr(module, pacman)
+                return getattr(module, pacman) # return the finded agent class
     raise Exception('The agent ' + pacman + ' is not specified in any *Agents.py.')
 
 def replayGame( layout, actions, display ):
