@@ -375,7 +375,20 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    # https://zhuanlan.zhihu.com/p/620720903, 不懂.
+    x, y = state[0]
+    heuristicAcc = 0
+    foodRemain = {}
+    for i in range(len(state[1])):
+        if state[1][i] == 0:
+            foodRemain[corners[i]] = 0
+    while len(foodRemain) > 0:
+        for nextNode in foodRemain.keys():
+            foodRemain[nextNode] = abs(x - nextNode[0]) + abs(y - nextNode[1])
+        x, y = min(foodRemain, key=lambda key: foodRemain[key])
+        heuristicAcc += foodRemain[(x, y)]
+        del foodRemain[(x, y)]
+    return heuristicAcc
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -469,7 +482,17 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    # https://zhuanlan.zhihu.com/p/620720903, 不懂.
+    x, y = position
+    foodRemain = {}
+    for food in foodGrid.asList():
+        foodRemain[food] = 0
+    while len(foodRemain) > 0:
+        for nextNode in foodRemain.keys():
+            foodRemain[nextNode] = mazeDistance((x, y), nextNode, problem.startingGameState)
+        x, y = max(foodRemain, key=lambda key: foodRemain[key])
+        return foodRemain[(x, y)]
+    return 0 # default return
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -500,7 +523,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return search.breadthFirstSearch(AnyFoodSearchProblem(gameState))
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -536,7 +559,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return (x, y) in self.food.asList() # eat at least one food
 
 def mazeDistance(point1: Tuple[int, int], point2: Tuple[int, int], gameState: pacman.GameState) -> int:
     """
