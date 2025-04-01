@@ -173,6 +173,8 @@ class Grid:
 
         self.width = width
         self.height = height
+        # self.data init with all False or all True
+        # self.data :: [[Bool]]
         self.data = [[initialValue for y in range(height)] for x in range(width)]
         if bitRepresentation:
             self._unpackBits(bitRepresentation)
@@ -204,8 +206,8 @@ class Grid:
         return hash(h)
 
     def copy(self):
-        g = Grid(self.width, self.height)
-        g.data = [x[:] for x in self.data]
+        g = Grid(self.width, self.height) # get a new grid
+        g.data = [x[:] for x in self.data] # copy the data, line by line
         return g
 
     def deepCopy(self):
@@ -262,6 +264,7 @@ class Grid:
                 self[x][y] = bit
                 cell += 1
 
+    # _unpackInt :: Int -> Int -> [Bool]
     def _unpackInt(self, packed, size):
         bools = []
         if packed < 0: raise ValueError("must be a positive integer")
@@ -272,9 +275,13 @@ class Grid:
                 packed -= n
             else:
                 bools.append(False)
+        print('packed', packed)
+        print('bools', bools)
         return bools
 
+# seldom used
 def reconstituteGrid(bitRep):
+    print('bitRep', bitRep)
     if type(bitRep) is not type((1,2)):
         return bitRep
     width, height = bitRep[:2]
