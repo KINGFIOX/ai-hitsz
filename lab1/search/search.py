@@ -147,11 +147,45 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+def manhattanHeuristic(state, problem):
+    """
+    Calculate the Manhattan distance between the current state and the goal state.
+    """
+    x, y = state
+    goal_x, goal_y = problem.getGoalState()
+    return abs(x - goal_x) + abs(y - goal_y)
+
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
+    start = problem.getStartState()
+    frontier = util.PriorityQueue()
+    frontier.push(start, 0)
+    came_from = { start : None }
+    cost_so_far = { start : 0 }
+    cur_succ = { start : None } # action: cur -> succ
+
+    while not frontier.isEmpty():
+        cur = frontier.pop()       
+        if problem.isGoalState(cur):
+            break
+        for succ, action, stepCost in problem.getSuccessors(cur):
+            new_cost = cost_so_far[cur] + stepCost
+            if succ not in cost_so_far or new_cost < cost_so_far[succ]: # update cost and frontier
+                cost_so_far[succ] = new_cost
+                priority = new_cost + heuristic(succ, problem)
+                frontier.push(succ, priority)
+                came_from[succ] = cur # record the path
+                cur_succ[succ] = action
+    
+    path = []
+    while cur != start:
+        path.append(cur_succ[cur])
+        cur = came_from[cur]
+    path.reverse()
+
+    return path
 
 # Abbreviations
 bfs = breadthFirstSearch
