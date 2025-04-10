@@ -22,7 +22,7 @@ code to run a game.  This file is divided into three sections:
           correctly.  This section contains the parts of the code
           that you will need to understand in order to complete the
           project.  There is also some code in game.py that you should
-          understand.
+          underhtand.
 
   (ii)  The hidden secrets of pacman:
           This section contains all of the logic code that the pacman

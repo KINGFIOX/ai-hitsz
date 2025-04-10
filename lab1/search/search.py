@@ -72,6 +72,18 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+def uniSearch(init : callable, update : callable, end : callable) -> list:
+    info = init()
+    problem : SearchProblem = info["problem"]
+    frontier = info["frontier"]
+    while not frontier.isEmpty():
+        state = frontier.peek()[0] # just peek
+        if problem.isGoalState(state):
+            return end(info) # would pop
+        update(info) # would pop
+    return []
+
+
 def depthFirstSearch(problem: SearchProblem) -> list:
     """
     Search the deepest nodes in the search tree first.
@@ -87,36 +99,44 @@ def depthFirstSearch(problem: SearchProblem) -> list:
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
+    def init():
+        reached = set()
+        frontier = util.Stack() # (neighbors, actions in path)
+        frontier.push((problem.getStartState(), [], 0))
+        return { "reached" : reached, "frontier" : frontier, "problem" : problem }
 
-    reached = set()
-    frontier = util.Stack() # (neighbors, actions in path)
-    frontier.push((problem.getStartState(), []))
-    while not frontier.isEmpty():
-        state, path = frontier.pop()
-        if problem.isGoalState(state):
-            return path
+    def update(info):
+        frontier = info["frontier"]
+        reached = info["reached"]
+        state, path, path_cost = frontier.pop()
         if not state in reached:
             reached.add(state)
             for successor, action, stepCost in problem.getSuccessors(state):
                 newPath = path + [action]
-                frontier.push((successor, newPath))
-    return []
+                frontier.push((successor, newPath, path_cost + stepCost))
+
+    def end(info):
+        frontier = info["frontier"]
+        _, path, _ = frontier.pop()
+        return path
+
+    return uniSearch(init, update, end)
 
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
     reached = set()
     frontier = util.Queue() # (neighbors, actions in path)
-    frontier.push((problem.getStartState(), []))
+    frontier.push((problem.getStartState(), [], 0))
     while not frontier.isEmpty():
-        state, path = frontier.pop()
+        state, path, path_cost = frontier.pop()
         if problem.isGoalState(state):
             return path
         if not state in reached:
             reached.add(state)
             for successor, action, stepCost in problem.getSuccessors(state):
                 newPath = path + [action]
-                frontier.push((successor, newPath))
+                frontier.push((successor, newPath, path_cost + stepCost))
     return []
 
 
@@ -161,31 +181,30 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
 
     start = problem.getStartState()
     frontier = util.PriorityQueue()
-    frontier.push(start, 0)
+    frontier.push((start, ()), 0)
     came_from = { start : None }
     cost_so_far = { start : 0 }
     cur_succ = { start : None } # action: cur -> succ
 
     while not frontier.isEmpty():
-        cur = frontier.pop()       
+        cur, _ = frontier.pop()       
         if problem.isGoalState(cur):
-            break
+            path = []
+            while cur != start:
+                path.append(cur_succ[cur])
+                cur = came_from[cur]
+            path.reverse()
+            return path
         for succ, action, stepCost in problem.getSuccessors(cur):
             new_cost = cost_so_far[cur] + stepCost
             if succ not in cost_so_far or new_cost < cost_so_far[succ]: # update cost and frontier
                 cost_so_far[succ] = new_cost
                 priority = new_cost + heuristic(succ, problem)
-                frontier.push(succ, priority)
+                frontier.push((succ, ()), priority)
                 came_from[succ] = cur # record the path
                 cur_succ[succ] = action
     
-    path = []
-    while cur != start:
-        path.append(cur_succ[cur])
-        cur = came_from[cur]
-    path.reverse()
-
-    return path
+    return []
 
 # Abbreviations
 bfs = breadthFirstSearch

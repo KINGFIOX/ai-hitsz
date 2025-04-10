@@ -147,6 +147,9 @@ class Stack:
         "Returns true if the stack is empty"
         return len(self.list) == 0
 
+    def peek(self):
+        return self.list[-1]
+
 class Queue:
     "A container with a first-in-first-out (FIFO) queuing policy."
     def __init__(self):
@@ -167,6 +170,9 @@ class Queue:
         "Returns true if the queue is empty"
         return len(self.list) == 0
 
+    def peek(self):
+        return self.list[-1]
+
 class PriorityQueue:
     """
       Implements a priority queue data structure. Each inserted item
@@ -186,6 +192,9 @@ class PriorityQueue:
     def pop(self):
         (_, _, item) = heapq.heappop(self.heap)
         return item
+
+    def peek(self):
+        return self.heap[0][2]
 
     def isEmpty(self):
         return len(self.heap) == 0
