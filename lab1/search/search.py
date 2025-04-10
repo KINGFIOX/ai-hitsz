@@ -125,19 +125,29 @@ def depthFirstSearch(problem: SearchProblem) -> list:
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    reached = set()
-    frontier = util.Queue() # (neighbors, actions in path)
-    frontier.push((problem.getStartState(), [], 0))
-    while not frontier.isEmpty():
+    
+    def init():
+        reached = set()
+        frontier = util.Queue() # (neighbors, actions in path)
+        frontier.push((problem.getStartState(), [], 0))
+        return { "reached" : reached, "frontier" : frontier, "problem" : problem }
+
+    def update(info):
+        reached = info["reached"]
+        frontier = info["frontier"]
         state, path, path_cost = frontier.pop()
-        if problem.isGoalState(state):
-            return path
         if not state in reached:
             reached.add(state)
             for successor, action, stepCost in problem.getSuccessors(state):
                 newPath = path + [action]
                 frontier.push((successor, newPath, path_cost + stepCost))
-    return []
+
+    def end(info):
+        frontier = info["frontier"]
+        _, path, _ = frontier.pop()
+        return path
+        
+    return uniSearch(init, update, end)
 
 
 def uniformCostSearch(problem: SearchProblem):
