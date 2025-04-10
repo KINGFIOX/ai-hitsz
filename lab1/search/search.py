@@ -197,22 +197,22 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
 
-    start = problem.getStartState()
-    frontier = util.PriorityQueue()
-    frontier.push((start, ()), 0)
-    came_from = { start : None }
-    cost_so_far = { start : 0 }
-    cur_succ = { start : None } # action: cur -> succ
+    def init():
+        start = problem.getStartState()
+        frontier = util.PriorityQueue()
+        frontier.push((start, ()), 0)
+        came_from = { start : None }
+        cost_so_far = { start : 0 }
+        cur_succ = { start : None } # action: cur -> succ
+        return { "start": start, "frontier" : frontier, "came_from" : came_from, "cost_so_far" : cost_so_far, "cur_succ" : cur_succ, "problem" : problem }
 
-    while not frontier.isEmpty():
-        cur, _ = frontier.pop()       
-        if problem.isGoalState(cur):
-            path = []
-            while cur != start:
-                path.append(cur_succ[cur])
-                cur = came_from[cur]
-            path.reverse()
-            return path
+
+    def update(info):
+        frontier = info["frontier"]
+        came_from = info["came_from"]
+        cost_so_far = info["cost_so_far"]
+        cur_succ = info["cur_succ"]
+        cur = frontier.pop()[0]
         for succ, action, stepCost in problem.getSuccessors(cur):
             new_cost = cost_so_far[cur] + stepCost
             if succ not in cost_so_far or new_cost < cost_so_far[succ]: # update cost and frontier
@@ -221,8 +221,22 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
                 frontier.push((succ, ()), priority)
                 came_from[succ] = cur # record the path
                 cur_succ[succ] = action
-    
-    return []
+
+    def end(info):
+        start = info["start"]
+        frontier = info["frontier"]
+        cur_succ = info["cur_succ"]
+        came_from = info["came_from"]
+        # organize the result
+        path = []
+        cur = frontier.pop()[0]
+        while cur != start:
+            path.append(cur_succ[cur])
+            cur = came_from[cur]
+        path.reverse()
+        return path
+  
+    return uniSearch(init, update, end)
 
 # Abbreviations
 bfs = breadthFirstSearch
