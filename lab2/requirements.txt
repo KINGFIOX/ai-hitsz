@@ -2,7 +2,7 @@
 # $ conda create --name <env> --file <this file>
 # platform: linux-64
 
-ipykernel=6.28.0
-matplotlib=3.8.0
-numpy=1.22.3
-imageio=2.33.1
+ipykernel
+matplotlib
+numpy
+imageio
