@@ -15,14 +15,17 @@ def sigmoid(x):
     返回:sigmoid函数值,numpy数组类型
     """
     # 指数函数可直接使用numpy.exp()
-    Todo()
+    return 1 / (1 + np.exp(-x))
+
 
 def sigmoid_grad(x):
     """ sigmoid函数梯度
     x: numpy数组类型
     返回: 梯度值,numpy数组类型
     """
-    Todo()
+    s = sigmoid(x)
+    return s * (1 - s)
+
 
 
 def softmax(x):
@@ -31,7 +34,16 @@ def softmax(x):
     返回: numpy数组类型
     """
     # 如果x中的值过大会导致指数计算的结果过大发生溢出：np.exp(x)会出现inf，最终的结果会出现nan，可考虑减去每一个样本对应x中的最大值
-    Todo()
+    if x.ndim == 2:
+        # 针对每一行（样本）进行数值稳定处理
+        x_max = np.max(x, axis=1, keepdims=True)
+        x_exp = np.exp(x - x_max)
+        return x_exp / np.sum(x_exp, axis=1, keepdims=True)
+    else:
+        # 一维向量的情况
+        x_max = np.max(x)
+        x_exp = np.exp(x - x_max)
+        return x_exp / np.sum(x_exp)
 
 def cross_entropy_error(y, t):
     # y是预测标签，t是真实标签
@@ -103,13 +115,8 @@ def sgd(params, grads, learning_rate = 0.001):
 
 
 def conv_forward_naive(x, w, b, conv_param):
-    """可以用np.lib.stride_tricks.sliding_window_view产生滑动窗口
-       可以用np.pad填充
+    """
     A naive implementation of the forward pass for a convolutional layer.
-
-    The input consists of N data points, each with C channels, height H and
-    width W. We convolve each input with F different filters, where each filter
-    spans all C channels and has height HH and width WW.
 
     Input:
     - x: Input data of shape (N, C, H, W)
@@ -120,19 +127,48 @@ def conv_forward_naive(x, w, b, conv_param):
         horizontal and vertical directions.
       - 'pad': The number of pixels that will be used to zero-pad the input.
 
-    During padding, 'pad' zeros should be placed symmetrically (i.e equally on both sides)
-    along the height and width axes of the input. Be careful not to modfiy the original
-    input x directly.
-
     Returns a tuple of:
     - out: Output data, of shape (N, F, H', W') where H' and W' are given by
       H' = 1 + (H + 2 * pad - HH) / stride
       W' = 1 + (W + 2 * pad - WW) / stride
-    - cache: (x_p, w, b, conv_param)  返回填充后的x便于反向传播直接使用
+    - cache: (x_p, w, b, conv_param)
     """
+    stride = conv_param['stride']
+    pad = conv_param['pad']
     
-    Todo()
+    # Pad the input x
+    x_p = np.pad(x, ((0,), (0,), (pad,), (pad,)), mode='constant', constant_values=0)
     
+    N, C, H, W = x.shape
+    F, C, HH, WW = w.shape
+    
+    # Calculate output dimensions
+    H_out = 1 + (H + 2 * pad - HH) // stride
+    W_out = 1 + (W + 2 * pad - WW) // stride
+    
+    # Initialize output
+    out = np.zeros((N, F, H_out, W_out))
+    
+    # Perform the convolution
+    for i in range(N):
+        for f in range(F):
+            for h in range(H_out):
+                for w_ in range(W_out):
+                    # Determine the sliding window position
+                    h_start = h * stride
+                    h_end = h_start + HH
+                    w_start = w_ * stride
+                    w_end = w_start + WW
+                    
+                    # Extract the window from the padded input
+                    window = x_p[i, :, h_start:h_end, w_start:w_end]
+                    
+                    # Convolution: element-wise multiplication and summation with bias
+                    out[i, f, h, w_] = np.sum(window * w[f, :, :, :]) + b[f]
+    
+    cache = (x_p, w, b, conv_param)
+    
+    return out, cache
 
 def conv_backward_naive(dout, cache):
     """A naive implementation of the backward pass for a convolutional layer.
